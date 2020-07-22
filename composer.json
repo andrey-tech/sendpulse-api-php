@@ -1,0 +1,27 @@
+{
+    "name": "andrey-tech/sendpulse-api-php",
+    "description": "Простая обертка для работы с API SendPulse с троттлингом запросов и логированием в файл",
+    "keywords": [ "sendpulse", "api", "api-wrapper", "throttling", "logging" ],
+    "homepage": "https://github.com/andrey-tech/sendpulse-api-php",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "andrey-tech",
+            "homepage": "https://github.com/andrey-tech/",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "andrey-tech/http-client-php": "^2.9.1",
+        "andrey-tech/debug-logger-php": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "\\App\\SendPulse\\": "src/App/SendPulse"
+        }
+    }
+}
