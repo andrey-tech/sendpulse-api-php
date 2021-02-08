@@ -4,16 +4,18 @@
  * Трейт Templates. Содержит методы для работы с шаблонами SendPulse
  *
  * @author    andrey-tech
- * @copyright 2020 andrey-tech
+ * @copyright 2020-2021 andrey-tech
  * @see https://github.com/andrey-tech/sendpulse-api-php
  * @license   MIT
  *
- * @version 1.0.0
+ * @version 1.0.1
  *
  * v1.0.0 (19.07.2020) Начальная версия
+ * v1.0.1 (07.02.2021) Рефакторинг
  *
  */
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace App\SendPulse;
 
@@ -24,7 +26,7 @@ trait Templates
      * @param  int $id ID шаблона
      * @return array
      */
-    public function getTemplate(int $id) :array
+    public function getTemplate(int $id): array
     {
         return $this->request('GET', '/template/' . $id);
     }
@@ -35,12 +37,12 @@ trait Templates
      * @param string $lang Фильтр по языку шаблона (ru, en)
      * @return array
      */
-    public function getTemplates(string $owner = null, string $lang = null) :array
+    public function getTemplates(string $owner = null, string $lang = null): array
     {
         $path = '/templates';
         $params = [];
 
-         if (! empty($lang)) {
+        if (! empty($lang)) {
             $path .= '/' . $lang;
         }
 
@@ -56,7 +58,7 @@ trait Templates
      * @param array $params Параметры шаблона
      * @return int
      */
-    public function addTemplate(array $params) :int
+    public function addTemplate(array $params): int
     {
         $response =  $this->request('POST', '/template', $params);
         return $response['real_id'];
@@ -64,11 +66,11 @@ trait Templates
 
     /**
      * Обновляет шаблон
-     * @param array $id ID шщаблона
+     * @param int $id ID шаблона
      * @param array $params Параметры шаблона
      * @return array
      */
-    public function updateTemplate(int $id, array $params) :array
+    public function updateTemplate(int $id, array $params): array
     {
         return $this->request('POST', '/template/edit/' . $id, $params);
     }

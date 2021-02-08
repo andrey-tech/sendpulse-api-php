@@ -1,26 +1,28 @@
 <?php
+
 /**
  * Класс SendPulseAPI. Выполняет запросы к REST API сервиса SendPulse
  *
  * @author    andrey-tech
- * @copyright 2020 andrey-tech
+ * @copyright 2020-2021 andrey-tech
  * @see https://github.com/andrey-tech/sendpulse-api-php
  * @license   MIT
  *
- * @version 1.0.1
+ * @version 1.1.0
  *
  * v1.0.0 (01.07.2020) Начальный релиз
- * v1.0.1 (19.07.2020) Рефракторинг
+ * v1.0.1 (19.07.2020) Рефакторинг
+ * v1.1.0 (06.02.2021) Изменения для классов HTTP v3.0 и DebugLogger v2.0; добавлен метод setLogger()
  *
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\SendPulse;
 
+use App\HTTP\HTTP;
 use Closure;
 use Generator;
-use App\HTTP;
 
 class SendPulseAPI
 {
@@ -31,20 +33,20 @@ class SendPulseAPI
     use Smtp;
 
     /**
-     * URL для REST API
+     * SendPulse REST API URL
      * @var string
      */
     const URL = 'https://api.sendpulse.com';
 
     /**
      * Объект класса, выполняющего логирование
-     * @var object
+     * @var \App\DebugLogger\DebugLogger
      */
     public $logger;
 
     /**
-     * Объект класса \App\HTTP
-     * @var object
+     * Объект класса \App\HTTP\HTTP
+     * @var HTTP
      */
     public $http;
 
@@ -52,7 +54,7 @@ class SendPulseAPI
      * Последний ответ от API SendPulse
      * @var array
      */
-    protected $lastResponse;
+    private $lastResponse;
 
     /**
      * Конструктор
@@ -66,6 +68,20 @@ class SendPulseAPI
     }
 
     /**
+     * Устанавливает объект класса, выполняющего логирование
+     * @param \App\DebugLogger\DebugLoggerInterface $logger
+     */
+    public function setLogger($logger)
+    {
+        if (!($logger instanceof \App\DebugLogger\DebugLoggerInterface)) {
+            throw new SendPulseAPIException(
+                "Класс логгера должен реализовывать интерфейс \App\DebugLogger\DebugLoggerInterface"
+            );
+        }
+        $this->logger = $logger;
+    }
+
+    /**
      * Возвращает последний ответ от API SendPulse
      * @return mixed
      */
@@ -76,19 +92,18 @@ class SendPulseAPI
 
     /**
      * Отправляет запрос в API SendPulse
-     * @param  string $method Метод запроса
-     * @param  string $path Путь в URL запроса
-     * @param  array  $params Параметры запроса
+     * @param string $method Метод запроса
+     * @param string $path Путь в URL запроса
+     * @param array $params Параметры запроса
      * @return array|null
+     * @throws SendPulseAPIException
      */
     public function request(string $method, string $path, array $params = [])
     {
         $url = self::URL . $path;
         $headers = [];
-
         // Это запрос авторизации?
         $isAuth = $path === '/oauth/access_token';
-
         // Если это НЕ запрос авторизации
         if (! $isAuth) {
             // Проверка выполненной авторизации по наличию access token клиента
@@ -105,7 +120,6 @@ class SendPulseAPI
         }
 
         $this->lastResponse = $this->http->request($url, $method, $params, $headers);
-     
         // Логирование ответа
         if (isset($this->logger)) {
             $jsonResponse = $this->toJSON($this->lastResponse, true);
@@ -122,10 +136,8 @@ class SendPulseAPI
              */
             if ($httpCode === 401 && ! $isAuth) {
                 $this->reOAuth2();
-
                 $this->request($method, $path, $params);
                 $this->reOAuth2Counter = 0;
-
                 return $this->lastResponse;
             }
 
@@ -145,10 +157,9 @@ class SendPulseAPI
      * @param bool $prettyPrint Включает pretty print для JSON
      * @return string
      */
-    protected function toJSON($data, bool $prettyPrint = false) :string
+    private function toJSON($data, bool $prettyPrint = false): string
     {
-        $encodeOptions = JSON_UNESCAPED_UNICODE|JSON_PARTIAL_OUTPUT_ON_ERROR;
-
+        $encodeOptions = JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR;
         if ($prettyPrint) {
             $encodeOptions |= JSON_PRETTY_PRINT;
         }
@@ -163,20 +174,18 @@ class SendPulseAPI
 
     /**
      * Загружает все сущности заданного типа
-     * @param \Closure $closure Анонимная функция-замыкание для загрузки сущностей $closure(int $offset)
+     * @param Closure $closure Анонимная функция-замыкание для загрузки сущностей $closure(int $offset)
      *                          $offset - смещение выдачи
-     * @return \Generator
+     * @return Generator
      */
-    public function getAll(Closure $closure) :Generator
+    public function getAll(Closure $closure): Generator
     {
         $offset = 0;
         do {
             $entities = $closure($offset);
-          
             yield $entities;
-
             $count = count($entities);
-            if ($count == 0) {
+            if ($count === 0) {
                 break;
             }
 

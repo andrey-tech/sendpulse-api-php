@@ -4,16 +4,18 @@
  * Трейт Campaigns. Содержит методы для работы с кампаниями SendPulse
  *
  * @author    andrey-tech
- * @copyright 2020 andrey-tech
+ * @copyright 2020-2021 andrey-tech
  * @see https://github.com/andrey-tech/sendpulse-api-php
  * @license   MIT
  *
- * @version 1.0.0
+ * @version 1.0.1
  *
  * v1.0.0 (02.07.2020) Начальная версия
+ * v1.0.1 (07.02.2021) Рефакторинг
  *
  */
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace App\SendPulse;
 
@@ -26,7 +28,7 @@ trait Campaigns
      * @param  int $id ID кампании
      * @return array
      */
-    public function getCampaign(int $id) :array
+    public function getCampaign(int $id): array
     {
         return $this->request('GET', '/campaigns/' . $id);
     }
@@ -37,7 +39,7 @@ trait Campaigns
      * @param  int|null $offset Смещение выдачи (начиная с какой записи показывать)
      * @return array
      */
-    public function getCampaigns(int $limit = null, int $offset = null) :array
+    public function getCampaigns(int $limit = null, int $offset = null): array
     {
         $params = [];
 
@@ -54,9 +56,9 @@ trait Campaigns
 
     /**
      * Возвращает список всех кампаний
-     * @return \Generator
+     * @return Generator
      */
-    public function getAllCampaigns() :Generator
+    public function getAllCampaigns(): Generator
     {
         return $this->getAll(function ($offset) {
             return $this->getCampaigns($limit = null, $offset);
@@ -68,7 +70,7 @@ trait Campaigns
      * @param array $params Параметры кампании
      * @return int
      */
-    public function addCampaign(array $params) :int
+    public function addCampaign(array $params): int
     {
         $response =  $this->request('POST', '/campaigns', $params);
         return $response['id'];
@@ -76,21 +78,21 @@ trait Campaigns
 
     /**
      * Обновляет запланированную кампанию
-     * @param array $id ID кампании
+     * @param int $id ID кампании
      * @param array $params Параметры кампании
      * @return array
      */
-    public function updateCampaign(int $id, array $params) :array
+    public function updateCampaign(int $id, array $params): array
     {
         return $this->request('PATCH', '/campaigns/' . $id, $params);
     }
 
     /**
      * Отменяет отправку запланированной кампании
-     * @param array $id ID кампании
+     * @param int $id ID кампании
      * @return array
      */
-    public function deleteCampaign(int $id) :array
+    public function deleteCampaign(int $id): array
     {
         return $this->request('DELETE', '/campaigns/' . $id);
     }
@@ -102,7 +104,7 @@ trait Campaigns
      * @param  int|null $offset Смещение выдачи (начиная с какой записи показывать)
      * @return array
      */
-    public function getAddressbookCampaigns(int $id, int $limit = null, int $offset = null) :array
+    public function getAddressbookCampaigns(int $id, int $limit = null, int $offset = null): array
     {
         $params = [];
 
@@ -120,9 +122,9 @@ trait Campaigns
     /**
      * Возвращает список всех кампаний, которые создавались по данной адресной книге
      * @param  int      $id ID адресной книги
-     * @return \Generator
+     * @return Generator
      */
-    public function getAllAddressbookCampaigns(int $id) :Generator
+    public function getAllAddressbookCampaigns(int $id): Generator
     {
         return $this->getAll(function ($offset) use ($id) {
             return $this->getAddressbookCampaigns($id, $limit = null, $offset);

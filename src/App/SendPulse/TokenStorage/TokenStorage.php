@@ -1,30 +1,37 @@
 <?php
 
 /**
- * Класс FileStorage. Реализует хранение токенов в файлах
+ * Класс TokenStorage. Реализует хранение токенов в файлах
  *
  * @author    andrey-tech
- * @copyright 2020 andrey-tech
+ * @copyright 2020-2021 andrey-tech
  * @see https://github.com/andrey-tech/sendpulse-api-php
  * @license   MIT
  *
- * @version 1.0.0
+ * @version 1.1.0
  *
  * v1.0.0 (21.07.2020) Начальный релиз
+ * v1.1.0 (07.02.2021) Изменение имени класса на TokenStorage. Добавлено свойство $mkdirMode
  *
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\SendPulse\TokenStorage;
 
-class FileStorage implements TokenStorageInterface
+class TokenStorage implements TokenStorageInterface
 {
+    /**
+     * Устанавливает режим доступа для создаваемых каталогов для хранения токенов
+     * @var int
+     */
+    public $mkdirMode = 0755;
+
     /**
      * Каталог для хранения файлов с токенами
      * @var string
      */
-    protected $storageFolder;
+    private $storageFolder;
 
     /**
      * Конструктор
@@ -65,7 +72,7 @@ class FileStorage implements TokenStorageInterface
             return null;
         }
 
-        $fh = @fopen($tokenFile, 'r');
+        $fh = @fopen($tokenFile, 'rb');
         if ($fh === false) {
             throw new TokenStorageException("Не удалось открыть файл токена '{$tokenFile}'");
         }
@@ -96,8 +103,9 @@ class FileStorage implements TokenStorageInterface
      * @param string $clientId ID клиента
      * @param string $clientSecret Секрет клиента
      * @return bool
+     * @throws TokenStorageException
      */
-    public function hasTokens(string $clientId, string $clientSecret) :bool
+    public function hasToken(string $clientId, string $clientSecret): bool
     {
         $tokenFile =  $this->getTokenFileName($clientId, $clientSecret);
         return is_file($tokenFile);
@@ -110,12 +118,14 @@ class FileStorage implements TokenStorageInterface
      * @return string
      * @throws TokenStorageException
      */
-    protected function getTokenFileName(string $clientId, string $clientSecret) :string
+    protected function getTokenFileName(string $clientId, string $clientSecret): string
     {
         $storageFolder = __DIR__ . DIRECTORY_SEPARATOR . $this->storageFolder;
         if (! is_dir($storageFolder)) {
-            if (! mkdir($storageFolder, $mode = 0755, $recursive = true)) {
-                throw new TokenStorageException("Не удалось рекурсивно создать каталог файлов токенов '{$storageFolder}'");
+            if (!mkdir($storageFolder, $this->mkdirMode, $recursive = true) && !is_dir($storageFolder)) {
+                throw new TokenStorageException(
+                    "Не удалось рекурсивно создать каталог файлов токенов '{$storageFolder}'"
+                );
             }
         }
 
@@ -129,10 +139,10 @@ class FileStorage implements TokenStorageInterface
     /**
      * Возвращает хэш клиента по ID клиента и секрету клиента
      * @param string $clientId ID клиента
-     * @param string $clientId Секрет клиента
+     * @param string $clientSecret Секрет клиента
      * @return string
      */
-    protected function getClientHash(string $clientId, string $clientSecret) :string
+    protected function getClientHash(string $clientId, string $clientSecret): string
     {
         return md5($clientId . ':' . $clientSecret);
     }

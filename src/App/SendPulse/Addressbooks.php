@@ -4,16 +4,18 @@
  * Трейт Addressbooks. Содержит методы для работы с адресными книгами SendPulse
  *
  * @author    andrey-tech
- * @copyright 2020 andrey-tech
+ * @copyright 2020-2021 andrey-tech
  * @see https://github.com/andrey-tech/sendpulse-api-php
  * @license   MIT
  *
- * @version 1.0.0
+ * @version 1.0.1
  *
  * v1.0.0 (19.07.2020) Начальная версия
+ * v1.0.1 (07.02.2021) Рефакторинг
  *
  */
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace App\SendPulse;
 
@@ -26,7 +28,7 @@ trait Addressbooks
      * @param  int $id ID адресной книги
      * @return array
      */
-    public function getAddressbook(int $id) :array
+    public function getAddressbook(int $id): array
     {
         return $this->request('GET', '/addressbooks/' . $id);
     }
@@ -38,7 +40,7 @@ trait Addressbooks
 
      * @return array
      */
-    public function getAddressbooks(int $limit = null, int $offset = null) :array
+    public function getAddressbooks(int $limit = null, int $offset = null): array
     {
         $params = [];
 
@@ -55,9 +57,9 @@ trait Addressbooks
 
     /**
      * Возвращает список всех адресных книг
-     * @return \Generator
+     * @return Generator
      */
-    public function getAllAddressbooks() :Generator
+    public function getAllAddressbooks(): Generator
     {
         return $this->getAll(function ($offset) {
             return $this->getAddressbooks($limit = null, $offset);
@@ -69,7 +71,7 @@ trait Addressbooks
      * @param array $params Параметры адресной книги
      * @return int
      */
-    public function addAddressbook(array $params) :int
+    public function addAddressbook(array $params): int
     {
         $response =  $this->request('POST', '/addressbooks', $params);
         return $response['id'];
@@ -77,21 +79,21 @@ trait Addressbooks
 
     /**
      * Обновляет адресную книгу
-     * @param array $id ID адресной книги
+     * @param int $id ID адресной книги
      * @param array $params Параметры адресной книги
      * @return array
      */
-    public function updateAddressbook(int $id, array $params) :array
+    public function updateAddressbook(int $id, array $params): array
     {
         return $this->request('PUT', '/addressbooks/' . $id, $params);
     }
 
     /**
      * Удаляет адресную книгу
-     * @param array $id ID адресной книги
+     * @param int $id ID адресной книги
      * @return array
      */
-    public function deleteAddressbook(int $id) :array
+    public function deleteAddressbook(int $id): array
     {
         return $this->request('DELETE', '/addressbooks/' . $id);
     }
@@ -102,7 +104,7 @@ trait Addressbooks
      * @param array $emails Парамеры контактов
      * @return array
      */
-    public function addAddressbookEmails(int $id, array $emails) :array
+    public function addAddressbookEmails(int $id, array $emails): array
     {
         $params = [ 'emails' => $emails ];
         return $this->request('POST', "/addressbooks/{$id}/emails", $params);
@@ -114,7 +116,7 @@ trait Addressbooks
      * @param array $emails Список email адресов
      * @return array
      */
-    public function deleteAddressbookEmails(int $id, array $emails) :array
+    public function deleteAddressbookEmails(int $id, array $emails): array
     {
         $params = [ 'emails' => $emails ];
         return $this->request('DELETE', "/addressbooks/{$id}/emails", $params);
@@ -128,7 +130,7 @@ trait Addressbooks
 
      * @return array
      */
-    public function getAddressbookEmails(int $id, int $limit = null, int $offset = null) :array
+    public function getAddressbookEmails(int $id, int $limit = null, int $offset = null): array
     {
         $params = [];
 
@@ -146,9 +148,9 @@ trait Addressbooks
     /**
      * Возвращает список всех email адресов в адресной книге
      * @param  int $id ID адресной книги
-     * @return \Generator
+     * @return Generator
      */
-    public function getAllAddressbookEmails(int $id) :Generator
+    public function getAllAddressbookEmails(int $id): Generator
     {
         return $this->getAll(function ($offset) use ($id) {
             return $this->getAddressbookEmails($id, $limit = null, $offset);
@@ -160,7 +162,7 @@ trait Addressbooks
      * @param  int $id ID адресной книги
      * @return int
      */
-    public function getAddressbookEmailsTotal(int $id) :int
+    public function getAddressbookEmailsTotal(int $id): int
     {
         $response = $this->request('GET', "/addressbooks/{$id}/emails/total");
         return $response['total'];
@@ -171,7 +173,7 @@ trait Addressbooks
      * @param int $id ID адресной книги
      * @return array
      */
-    public function getAddresbookVariables(int $id) :array
+    public function getAddresbookVariables(int $id): array
     {
         return $this->request('GET', "/addressbooks/{$id}/variables");
     }

@@ -4,21 +4,24 @@
  * Трейт Auth. Содержит методы для авторизации в SendPulse
  *
  * @author    andrey-tech
- * @copyright 2020 andrey-tech
+ * @copyright 2020-2021 andrey-tech
  * @see https://github.com/andrey-tech/sendpulse-api-php
  * @license   MIT
  *
- * @version 1.1.0
+ * @version 1.0.2
  *
  * v1.0.0 (01.07.2020) Начальная версия
- * v1.0.1 (19.07.2020) Рефракторинг
+ * v1.0.1 (19.07.2020) Рефакторинг
+ * v1.0.2 (07.02.2021) Изменения для класса TokenStorage
  *
  */
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace App\SendPulse;
 
-use App\SendPulse\TokenStorage\FileStorage;
+use App\SendPulse\TokenStorage\TokenStorage;
+use App\SendPulse\TokenStorage\TokenStorageException;
 
 trait Auth
 {
@@ -58,9 +61,9 @@ trait Auth
      * @param string $clientId ID клиента
      * @param string $clientSecret Секрет клиента
      * @return string
-     * @throws SendPulseAPIException
+     * @throws SendPulseAPIException|TokenStorageException
      */
-    public function auth(string $clientId, string $clientSecret) :string
+    public function auth(string $clientId, string $clientSecret): string
     {
         if (empty($clientId) || empty($clientSecret)) {
             throw new SendPulseAPIException("Пустой ID или секрет клиента");
@@ -70,7 +73,7 @@ trait Auth
         $this->clientSecret = $clientSecret;
 
         if (empty($this->tokenStorage)) {
-            $this->tokenStorage = new FileStorage();
+            $this->tokenStorage = new TokenStorage();
         }
 
         $clientToken = $this->tokenStorage->load($clientId, $clientSecret);
@@ -87,6 +90,7 @@ trait Auth
     /**
      * Выполняет повторную авторизацию в SendPulse при ответе '401 Unauthorized'
      * @return void
+     * @throws SendPulseAPIException
      */
     private function reOAuth2()
     {
@@ -108,7 +112,7 @@ trait Auth
      * Получает access token клиента, посылая запрос к API SendPulse
      * @return string
      */
-    private function getClientToken() :string
+    private function getClientToken(): string
     {
         $params = [
             'grant_type'    => 'client_credentials',
